@@ -1,4 +1,4 @@
-region: $REGION
+region: $AWS_REGION
 eksStackName: $EKSSTACKNAME
 cognito:
   userPoolId: $USERPOOLID
@@ -8,7 +8,7 @@ v1v2:
   enabled: false
 
 admin:
-  image: public.ecr.aws/o2b5n0j5/eks-saas-admin:latest
+  image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-admin
   port: 80
   targetPort: 80
   
@@ -18,18 +18,18 @@ core:
   tenantStackMappingTable: $TENANT_STACK_MAPPING_TABLE_NAME
 
   tenantManagement:
-    image: public.ecr.aws/o2b5n0j5/eks-saas-tenant-management:v1.1
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-tenant-management
     port: 80
     targetPort: 3001
     
   tenantRegistration:
-    image: public.ecr.aws/o2b5n0j5/eks-saas-tenant-registration:v1.1
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-tenant-registration
     name: tenant-registration
     port: 80
     targetPort: 3000
     
   userManagement:
-    image: public.ecr.aws/o2b5n0j5/eks-saas-user:v1.1
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-user
     name: user-management
     port: 80
     targetPort: 3015
@@ -39,19 +39,19 @@ app:
   iamRoleArn: $IAM_ROLE_ARN
   
   product:
-    image: public.ecr.aws/o2b5n0j5/eks-saas-product:v1.1
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-product
     productTable: $PRODUCTTABLE
     port: 80
     targetPort: 3005
     
   order:
-    image: public.ecr.aws/o2b5n0j5/eks-saas-order:v1.1
-    imagev2: public.ecr.aws/o2b5n0j5/eks-saas-order:v2
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order
+    imagev2: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order
     orderTable: $ORDERTABLE
     port: 80
     targetPort: 3010
   
   application:
-    image: public.ecr.aws/o2b5n0j5/eks-saas-application:latest
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-application
     port: 80
     targetPort: 80
