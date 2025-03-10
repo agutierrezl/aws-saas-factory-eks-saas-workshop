@@ -1,4 +1,4 @@
-FROM public.ecr.aws/bitnami/node:16.16.0 AS build
+FROM public.ecr.aws/bitnami/node:18.18.0 AS build
 WORKDIR /usr/src/app
 COPY package.json ./
 RUN yarn
