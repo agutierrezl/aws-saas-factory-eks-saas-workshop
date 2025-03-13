@@ -26,7 +26,7 @@ app:
     targetPort: 3005
     
   order:
-    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order:v1
     orderTable: $ORDERTABLE
     port: 80
     targetPort: 3010
