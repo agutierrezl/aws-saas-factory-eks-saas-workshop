@@ -74,6 +74,42 @@ kubectl completion bash >>  ~/.bash_completion
 UPDATE_KUBECONFIG=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[]" | jq -r '.[] | select(.OutputKey | startswith("eksworkshopeksctlConfigCommand")) | .OutputValue')
 eval $UPDATE_KUBECONFIG
 
+# Loading up the Docker images
+cd $HOME/environment
+aws s3 sync s3://eks-workshop-images/ ./workshop_docker_images/
+
+docker load < ./workshop_docker_images/eks-saas-admin.tar.gz
+docker load < ./workshop_docker_images/eks-saas-order.tar.gz
+docker load < ./workshop_docker_images/eks-saas-order-v2.tar.gz
+docker load < ./workshop_docker_images/eks-saas-user.tar.gz
+docker load < ./workshop_docker_images/eks-saas-product.tar.gz
+docker load < ./workshop_docker_images/eks-saas-application.tar.gz
+docker load < ./workshop_docker_images/eks-saas-tenant-registration.tar.gz
+docker load < ./workshop_docker_images/eks-saas-tenant-management.tar.gz
+
+# Tagging and pushing the Docker images to ECR
+docker tag eks-saas/eks-saas-admin:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-admin:latest
+docker tag eks-saas/eks-saas-order:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order:v1
+docker tag eks-saas/eks-saas-order:v2 $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order:v2
+docker tag eks-saas/eks-saas-user:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-user:latest
+docker tag eks-saas/eks-saas-product:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-product:latest
+docker tag eks-saas/eks-saas-tenant-registration:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-tenant-registration:latest
+docker tag eks-saas/eks-saas-tenant-management:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-tenant-management:latest
+docker tag eks-saas/eks-saas-application:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-application:latest
+
+aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-admin:latest
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order:v1
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-order:v2
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-product:latest
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-user:latest
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-application:latest
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-tenant-registration:latest
+docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/aws-workshop/eks-saas-tenant-management:latest
+
+rm -r workshop_docker_images
+
 cd $CWD
 # resource our bash config to ensure we're binding to the right version of the AWS CLI (v2, vs. v1)
 . ~/.bashrc
