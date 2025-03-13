@@ -16,6 +16,7 @@ import { BaselineInfraStack } from './constructs/baseline-infra/baseline-infra-s
 import { DynamoDbInitializer } from './constructs/generic/ddb-initializer';
 import { TenantInfraStack } from './constructs/tenant-infra/tenant-infra-stack';
 import { InstanceManagementStack } from './instance-management-stack';
+import { EcrRepositories } from './constructs/generic/ecr-initializer';
 
 export interface RootStackProps extends StackProps {
   clusterName: string;
@@ -97,6 +98,18 @@ export class RootStack extends Stack {
         CODEBUILD_ARN: { S: eksCodeBuildArn },
         IAM_ROLE_ARN: { S: roleArnUsedByTvm },
       },
+    });
+
+    const ecrRepositories = new EcrRepositories(this, 'EcrRepositories', {
+      repositoryNames: [
+        'aws-workshop/eks-saas-tenant-registration', 
+        'aws-workshop/eks-saas-tenant-management', 
+        'aws-workshop/eks-saas-order',
+        'aws-workshop/eks-saas-product',
+        'aws-workshop/eks-saas-application',
+        'aws-workshop/eks-saas-admin',
+        'aws-workshop/eks-saas-user'
+      ],
     });
 
     baseline.tenantStackMappingTable.grantReadData(tenantInfra.pipelineFunction.grantPrincipal);
