@@ -76,7 +76,9 @@ eval $UPDATE_KUBECONFIG
 
 # Loading up the Docker images
 cd $HOME/environment
-aws s3 sync s3://eks-workshop-images/ ./workshop_docker_images/
+ASSETS_BUCKET=$(aws cloudformation describe-stacks --query "Stacks[].Parameters[]" | jq -r '.[] | select(.ParameterKey | startswith("EEAssetsBucket")) | .ParameterValue')
+ASSETS_PREFIX=$(aws cloudformation describe-stacks --query "Stacks[].Parameters[]" | jq -r '.[] | select(.ParameterKey | startswith("EEAssetsKeyPrefix")) | .ParameterValue')
+aws s3 sync s3://$ASSETS_BUCKET/$ASSETS_PREFIX ./workshop_docker_images/
 
 docker load < ./workshop_docker_images/eks-saas-admin.tar.gz
 docker load < ./workshop_docker_images/eks-saas-order.tar.gz
