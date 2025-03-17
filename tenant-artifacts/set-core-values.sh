@@ -5,7 +5,6 @@
 export STACKS=$(aws cloudformation describe-stacks)
 export USERPOOLID=$(echo $STACKS | jq -r '.Stacks[]?.Outputs[]? | select(.OutputKey=="AdminUserPoolId") | .OutputValue')
 export APPCLIENTID=$(echo $STACKS | jq -r '.Stacks[]?.Outputs[]? | select(.OutputKey=="AdminAppClientId") | .OutputValue')
-#export REGION=$(aws configure get region)
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --region $AWS_REGION |jq -r ".Account")
 export ELBURL=$(kubectl get svc -l istio=ingress -n istio-ingress -o json | jq -r '.items[0].status.loadBalancer.ingress[0].hostname')
 export TENANT_TABLE_NAME=$(echo $STACKS | jq -r '.Stacks[]?.Outputs[]? | select(.OutputKey=="TenantTable") | .OutputValue')
