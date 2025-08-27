@@ -18,7 +18,7 @@ export class HelmChartStack extends NestedStack {
     const cluster = props.cluster;
     const ingressControllerReleaseName = 'istio-ingress';
     const istioHelmRepo = 'https://istio-release.storage.googleapis.com/charts';
-    const istioVersion = '1.19';
+    const istioVersion = '1.27';
     const istioSystemNamespaceName = 'istio-system';
     const istioIngressNamespaceName = 'istio-ingress';
     const ingressGatewayName = 'gateway';

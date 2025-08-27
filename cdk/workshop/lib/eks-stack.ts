@@ -124,7 +124,7 @@ export class EksStack extends cdk.NestedStack {
     this.cluster = cluster;
     const karpenter = new Karpenter(this, 'Karpenter', {
       cluster: cluster,
-      version: 'v0.37.0',
+      version: '1.2.4',
     });
 
     this.eksCodebuildRole = new iam.Role(this, 'CodeBuildKubectlRole', {
