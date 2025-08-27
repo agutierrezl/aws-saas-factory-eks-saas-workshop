@@ -9,7 +9,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import nodeRolePolicyDoc from './node-role-policy-doc';
 import { Construct } from 'constructs';
 import { Karpenter } from 'cdk-eks-karpenter';
-import { KubectlV27Layer } from '@aws-cdk/lambda-layer-kubectl-v27';
+import { KubectlV30Layer } from '@aws-cdk/lambda-layer-kubectl-v30';
 
 export interface EksStackProps extends cdk.NestedStackProps {
   instanceRoleArn: string;
@@ -33,8 +33,8 @@ export class EksStack extends cdk.NestedStack {
     const cluster = new eks.Cluster(this, `${props.clusterName}`, {
       clusterName: props.clusterName,
       mastersRole: clusterAdmin,
-      version: eks.KubernetesVersion.V1_27,
-      kubectlLayer: new KubectlV27Layer(this, 'kubectl'),
+      version: eks.KubernetesVersion.V1_32,
+      kubectlLayer: new KubectlV30Layer(this, 'kubectl'),
       defaultCapacity: 0,
       tags: {
         'karpenter.sh/discovery': `${props.clusterName}`,
@@ -124,7 +124,7 @@ export class EksStack extends cdk.NestedStack {
     this.cluster = cluster;
     const karpenter = new Karpenter(this, 'Karpenter', {
       cluster: cluster,
-      version: 'v0.31.2',
+      version: 'v0.37.0',
     });
 
     this.eksCodebuildRole = new iam.Role(this, 'CodeBuildKubectlRole', {
