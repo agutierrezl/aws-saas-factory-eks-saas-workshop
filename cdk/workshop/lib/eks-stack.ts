@@ -88,11 +88,32 @@ export class EksStack extends cdk.NestedStack {
       ],
     });
 
+    // Create custom nodegroup role with additional trusted principals
+    const customNodegroupRole = new iam.Role(this, 'CustomNodegroupRole', {
+      assumedBy: new iam.CompositePrincipal(
+        new iam.ServicePrincipal('ec2.amazonaws.com')
+      ),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonEKSWorkerNodePolicy'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonEKS_CNI_Policy'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2ContainerRegistryReadOnly'),
+      ],
+    });
+
+    const tagSession = customNodegroupRole.assumeRolePolicy?.addStatements(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['sts:TagSession', 'sts:AssumeRole'],
+      principals: [
+        new iam.ServicePrincipal('pods.eks.amazonaws.com')
+      ], 
+    }));
+
     // Create Managed Nodegroup.
     const nodegroup = new eks.Nodegroup(this, 'ng-1', {
       cluster,
       desiredSize: 3,
       instanceTypes: [ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.LARGE)],
+      nodeRole: customNodegroupRole,
       launchTemplateSpec: {
         // See https://github.com/aws/aws-cdk/issues/6734
         id: (launchTemplate.node.defaultChild as ec2.CfnLaunchTemplate).ref,
@@ -102,6 +123,19 @@ export class EksStack extends cdk.NestedStack {
     nodegroup.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')
     );
+
+    const podIdentityAddon = new eks.Addon(this, 'eks-pod-identity-agent', {
+      cluster,
+      addonName: 'eks-pod-identity-agent',
+    });
+    podIdentityAddon.node.addDependency(customNodegroupRole)
+
+    const podIdentityAssociation = new eks.CfnPodIdentityAssociation(this, 'PodIdentityAssociation', {
+      clusterName: cluster.clusterName,
+      roleArn: customNodegroupRole.roleArn,
+      serviceAccount: 'default',
+      namespace: 'default',
+    });
 
     //Export this for later use in the TVM
     const role = nodegroup.role;
