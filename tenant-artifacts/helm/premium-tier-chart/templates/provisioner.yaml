@@ -1,33 +1,36 @@
-apiVersion: karpenter.sh/v1alpha5
-kind: Provisioner
+apiVersion: karpenter.sh/v1
+kind: NodePool
 metadata:
   name: {{.Values.app.tenantPath}}
 spec:
-  # References cloud provider-specific custom resource, see your cloud provider specific documentation
-  providerRef:
-    name: {{.Values.app.tenantPath}}
-
-  taints:
-    - key: node-pool
-      value: {{.Values.app.tenantPath}}
-      effect: NoSchedule
-  labels:
-    node-pool: {{.Values.app.tenantPath}}
-    
+  template:
+    metadata:
+      labels:
+        node-pool: {{.Values.app.tenantPath}}
+    spec:
+      nodeClassRef:
+        kind: EC2NodeClass
+        name: {{.Values.app.tenantPath}}
+      taints:
+        - key: node-pool
+          value: {{.Values.app.tenantPath}}
+          effect: NoSchedule
   limits:
-    resources:
-      cpu: "100"
-
-  ttlSecondsAfterEmpty: 30
+    cpu: "100"
+  disruption:
+    consolidationPolicy: WhenEmpty
+    consolidateAfter: 30s
 ---
-apiVersion: karpenter.k8s.aws/v1alpha1
-kind: AWSNodeTemplate
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
 metadata:
   name: {{.Values.app.tenantPath}}
 spec:
-  subnetSelector:
-    "aws:cloudformation:stack-name" : {{ .Values.eksStackName }} 
-  securityGroupSelector:
-    "aws:eks:cluster-name" : "eksworkshop-eksctl"
+  subnetSelectorTerms:
+    - tags:
+        "aws:cloudformation:stack-name": {{ .Values.eksStackName }}
+  securityGroupSelectorTerms:
+    - tags:
+        "aws:eks:cluster-name": "eksworkshop-eksctl"
   tags:
     "karpenter.sh/discovery": "eksworkshop-eksctl"      
