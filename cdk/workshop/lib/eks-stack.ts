@@ -130,7 +130,7 @@ export class EksStack extends cdk.NestedStack {
     });
     podIdentityAddon.node.addDependency(customNodegroupRole)
 
-    const podIdentityAssociation = new eks.CfnPodIdentityAssociation(this, 'PodIdentityAssociation', {
+    const podIdentityAssociationSharedServices = new eks.CfnPodIdentityAssociation(this, 'podIdentityAssociationSharedServices', {
       clusterName: cluster.clusterName,
       roleArn: customNodegroupRole.roleArn,
       serviceAccount: 'default',
@@ -160,6 +160,16 @@ export class EksStack extends cdk.NestedStack {
       cluster: cluster,
       version: '1.2.4',
     });
+
+    // This Pod Identity Association enables the Karpenter service account in the 'karpenter' namespace
+    // to assume the specified IAM role, allowing Karpenter to manage resources in the cluster.
+    const podIdentityAssociationKarpenter = new eks.CfnPodIdentityAssociation(this, 'podIdentityAssociationKarpenter', {
+      clusterName: cluster.clusterName,
+      roleArn: customNodegroupRole.roleArn,
+      serviceAccount: 'karpenter',
+      namespace: 'karpenter',
+    });
+    podIdentityAssociationKarpenter.node.addDependency(karpenter);
 
     this.eksCodebuildRole = new iam.Role(this, 'CodeBuildKubectlRole', {
       assumedBy: new iam.AccountRootPrincipal(),
@@ -221,5 +231,6 @@ export class EksStack extends cdk.NestedStack {
 
     new cdk.CfnOutput(this, 'EksCodebuildArn', { value: this.eksCodebuildRole.roleArn });
     new cdk.CfnOutput(this, 'RoleUsedByTVM', { value: roleUsedByTokenVendingMachine.roleArn });
+    new cdk.CfnOutput(this, 'NodegroupRoleArn', { value: nodegroup.role.roleArn });
   }
 }
