@@ -9,8 +9,25 @@ spec:
         node-pool: {{.Values.app.tenantPath}}
     spec:
       nodeClassRef:
+        group: karpenter.k8s.aws
         kind: EC2NodeClass
         name: {{.Values.app.tenantPath}}
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: ["c", "m"]
+        - key: karpenter.k8s.aws/instance-family
+          operator: In
+          values: ["m5","c5"]
+        - key: karpenter.k8s.aws/instance-size
+          operator: In
+          values: ["large","xlarge"]
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
       taints:
         - key: node-pool
           value: {{.Values.app.tenantPath}}
@@ -26,9 +43,14 @@ kind: EC2NodeClass
 metadata:
   name: {{.Values.app.tenantPath}}
 spec:
+  role: {{.Values.eksNodegroupRoleArn}}
+  amiFamily: AL2023
+  amiSelectorTerms:
+    - alias: al2023@v20250904
   subnetSelectorTerms:
     - tags:
         "aws:cloudformation:stack-name": {{ .Values.eksStackName }}
+        "aws-cdk:subnet-type": "Private"
   securityGroupSelectorTerms:
     - tags:
         "aws:eks:cluster-name": "eksworkshop-eksctl"
