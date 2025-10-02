@@ -156,27 +156,6 @@ export class EksStack extends cdk.NestedStack {
       value: nodegroup.role.roleName,
     });
 
-    this.cluster = cluster;
-    const karpenter = new Karpenter(this, 'Karpenter', {
-      cluster: cluster,
-      version: '1.2.4',
-    });
-
-  /*  const karpenterPolicyDoc = createKarpenterPolicy(
-      cdk.Stack.of(this).region,
-      cdk.Stack.of(this).partition,
-      cdk.Stack.of(this).account,
-      customNodegroupRole.roleArn,
-      this.cluster.clusterName
-    );
-
-    const karpenterPolicy = new iam.Policy(this, 'KarpenterNodePolicy', {
-      document: karpenterPolicyDoc,
-    });
-    karpenterPolicy.node.addDependency(karpenter);
-
-    karpenter.nodeRole.attachInlinePolicy(karpenterPolicy);
-*/
     // This Pod Identity Association enables the Karpenter service account in the 'karpenter' namespace
     // to assume the specified IAM role, allowing Karpenter to manage resources in the cluster.
     const podIdentityAssociationKarpenter = new eks.CfnPodIdentityAssociation(this, 'podIdentityAssociationKarpenter', {
@@ -185,7 +164,12 @@ export class EksStack extends cdk.NestedStack {
       serviceAccount: 'karpenter',
       namespace: 'karpenter',
     });
-    podIdentityAssociationKarpenter.node.addDependency(karpenter);
+
+    this.cluster = cluster;
+    const karpenter = new Karpenter(this, 'Karpenter', {
+      cluster: cluster,
+      version: '1.2.4',
+    });
 
     this.eksCodebuildRole = new iam.Role(this, 'CodeBuildKubectlRole', {
       assumedBy: new iam.AccountRootPrincipal(),
