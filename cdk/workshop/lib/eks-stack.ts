@@ -7,7 +7,6 @@ import * as eks from 'aws-cdk-lib/aws-eks';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import nodeRolePolicyDoc from './node-role-policy-doc';
-import createKarpenterPolicy from './karpenter-node-role-policy-doc';
 import { Construct } from 'constructs';
 import { Karpenter } from 'cdk-eks-karpenter';
 import { KubectlV30Layer } from '@aws-cdk/lambda-layer-kubectl-v30';
