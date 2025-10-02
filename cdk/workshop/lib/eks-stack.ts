@@ -7,6 +7,7 @@ import * as eks from 'aws-cdk-lib/aws-eks';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import nodeRolePolicyDoc from './node-role-policy-doc';
+import createKarpenterPolicy from './karpenter-node-role-policy-doc';
 import { Construct } from 'constructs';
 import { Karpenter } from 'cdk-eks-karpenter';
 import { KubectlV30Layer } from '@aws-cdk/lambda-layer-kubectl-v30';
@@ -161,6 +162,21 @@ export class EksStack extends cdk.NestedStack {
       version: '1.2.4',
     });
 
+  /*  const karpenterPolicyDoc = createKarpenterPolicy(
+      cdk.Stack.of(this).region,
+      cdk.Stack.of(this).partition,
+      cdk.Stack.of(this).account,
+      customNodegroupRole.roleArn,
+      this.cluster.clusterName
+    );
+
+    const karpenterPolicy = new iam.Policy(this, 'KarpenterNodePolicy', {
+      document: karpenterPolicyDoc,
+    });
+    karpenterPolicy.node.addDependency(karpenter);
+
+    karpenter.nodeRole.attachInlinePolicy(karpenterPolicy);
+*/
     // This Pod Identity Association enables the Karpenter service account in the 'karpenter' namespace
     // to assume the specified IAM role, allowing Karpenter to manage resources in the cluster.
     const podIdentityAssociationKarpenter = new eks.CfnPodIdentityAssociation(this, 'podIdentityAssociationKarpenter', {
@@ -232,5 +248,6 @@ export class EksStack extends cdk.NestedStack {
     new cdk.CfnOutput(this, 'EksCodebuildArn', { value: this.eksCodebuildRole.roleArn });
     new cdk.CfnOutput(this, 'RoleUsedByTVM', { value: roleUsedByTokenVendingMachine.roleArn });
     new cdk.CfnOutput(this, 'NodegroupRoleArn', { value: nodegroup.role.roleArn });
+    new cdk.CfnOutput(this, 'KarpenterNodeRoleArn', { value: karpenter.nodeRole.roleArn });
   }
 }
