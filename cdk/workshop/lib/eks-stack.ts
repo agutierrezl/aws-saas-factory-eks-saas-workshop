@@ -182,6 +182,11 @@ export class EksStack extends cdk.NestedStack {
             }),
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
+              actions: ['eks:CreatePodIdentityAssociation'],
+              resources: [`arn:aws:eks:${this.region}:${this.account}:cluster/*`],
+            }),
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
               actions: ['dynamodb:CreateTable'],
               resources: ['*'],
             }),
@@ -194,6 +199,11 @@ export class EksStack extends cdk.NestedStack {
               effect: iam.Effect.ALLOW,
               actions: ['cloudformation:DescribeStacks'],
               resources: ['*'],
+            }),
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ['iam:PassRole', 'iam:GetRole'],
+              resources: [customNodegroupRole.roleArn],
             }),
           ],
         }),
