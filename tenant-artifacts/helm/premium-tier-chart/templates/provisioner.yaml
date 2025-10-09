@@ -55,4 +55,5 @@ spec:
     - tags:
         "aws:eks:cluster-name": "eksworkshop-eksctl"
   tags:
-    "karpenter.sh/discovery": "eksworkshop-eksctl"      
+    "karpenter.sh/discovery": "eksworkshop-eksctl"   
+    "Name": karpenter-managed-node   
